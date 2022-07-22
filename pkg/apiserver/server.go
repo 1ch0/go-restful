@@ -14,6 +14,7 @@ import (
 	"github.com/go-openapi/spec"
 
 	"github.com/1ch0/go-restful/pkg/apiserver/config"
+	"github.com/1ch0/go-restful/pkg/apiserver/infrastructure/datastore"
 	"github.com/1ch0/go-restful/pkg/apiserver/utils"
 	"github.com/1ch0/go-restful/pkg/apiserver/utils/container"
 	"github.com/1ch0/go-restful/pkg/apiserver/utils/log"
@@ -29,6 +30,7 @@ type restServer struct {
 	webContainer  *restful.Container
 	beanContainer *container.Container
 	cfg           config.Config
+	datastore     datastore.DataStore
 }
 
 func New(cfg config.Config) (a APIServer) {
