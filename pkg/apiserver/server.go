@@ -2,37 +2,56 @@ package apiserver
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"time"
 
-	"github.com/1ch0/go-restful/pkg/apiserver/interface/api"
-	"github.com/go-openapi/spec"
+	"github.com/1ch0/go-restful/pkg/apiserver/domain/service"
 
+	"github.com/1ch0/go-restful/pkg/apiserver/interface/api"
 	restfulSpec "github.com/emicklei/go-restful-openapi/v2"
 	"github.com/emicklei/go-restful/v3"
+	"github.com/go-openapi/spec"
 
 	"github.com/1ch0/go-restful/pkg/apiserver/config"
 	"github.com/1ch0/go-restful/pkg/apiserver/utils"
+	"github.com/1ch0/go-restful/pkg/apiserver/utils/container"
 	"github.com/1ch0/go-restful/pkg/apiserver/utils/log"
 	pkgUtils "github.com/1ch0/go-restful/pkg/utils"
 )
 
 type APIServer interface {
 	Run(context.Context, chan error) error
-	//BuildRestfulConfig() (*restfulSpec.Config, error)
+	BuildRestfulConfig() (*restfulSpec.Config, error)
 }
 
 type restServer struct {
-	webContainer *restful.Container
-	cfg          config.Config
+	webContainer  *restful.Container
+	beanContainer *container.Container
+	cfg           config.Config
 }
 
 func New(cfg config.Config) (a APIServer) {
 	s := &restServer{
-		webContainer: restful.NewContainer(),
-		cfg:          cfg,
+		webContainer:  restful.NewContainer(),
+		beanContainer: container.NewContainer(),
+		cfg:           cfg,
 	}
 	return s
+}
+
+func (s *restServer) buildIoCContainer() error {
+	// domain
+	if err := s.beanContainer.Provides(service.InitServiceBean(s.cfg)...); err != nil {
+		return fmt.Errorf("fail to provides the service bean to the container: %w", err)
+	}
+
+	// interfaces
+	if err := s.beanContainer.Provides(api.InitAPIBean()...); err != nil {
+		return fmt.Errorf("fail to provides the api bean to the container: %w", err)
+	}
+
+	return nil
 }
 
 func (s *restServer) Run(ctx context.Context, errChan chan error) error {
@@ -42,7 +61,10 @@ func (s *restServer) Run(ctx context.Context, errChan chan error) error {
 	return s.startHTTP(ctx)
 }
 
-func (s *restServer) BuildRestfulconfig() (*restfulSpec.Config, error) {
+func (s *restServer) BuildRestfulConfig() (*restfulSpec.Config, error) {
+	if err := s.buildIoCContainer(); err != nil {
+		return nil, err
+	}
 	config := s.RegisterAPIRoute()
 	return &config, nil
 }
