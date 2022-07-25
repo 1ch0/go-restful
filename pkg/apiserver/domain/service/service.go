@@ -13,7 +13,7 @@ func InitServiceBean(c config.Config) []interface{} {
 	//rbacService := NewRBACService()
 	userService := NewUserService()
 	authenticationService := NewAuthenticationService()
-	needInitData = []DataInit{userService}
+	//needInitData = []DataInit{userService}
 	return []interface{}{userService, authenticationService}
 }
 
