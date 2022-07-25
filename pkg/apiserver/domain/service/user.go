@@ -2,6 +2,8 @@ package service
 
 import (
 	"context"
+
+	"github.com/1ch0/go-restful/pkg/apiserver/infrastructure/datastore"
 )
 
 type UserService interface {
@@ -9,6 +11,7 @@ type UserService interface {
 }
 
 type userServiceImpl struct {
+	Store datastore.DataStore `inject:"datastore"`
 }
 
 // NewUserService new User service

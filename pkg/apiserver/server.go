@@ -6,15 +6,15 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/1ch0/go-restful/pkg/apiserver/domain/service"
-
-	"github.com/1ch0/go-restful/pkg/apiserver/interface/api"
 	restfulSpec "github.com/emicklei/go-restful-openapi/v2"
 	"github.com/emicklei/go-restful/v3"
 	"github.com/go-openapi/spec"
 
 	"github.com/1ch0/go-restful/pkg/apiserver/config"
+	"github.com/1ch0/go-restful/pkg/apiserver/domain/service"
 	"github.com/1ch0/go-restful/pkg/apiserver/infrastructure/datastore"
+	"github.com/1ch0/go-restful/pkg/apiserver/infrastructure/datastore/mongodb"
+	"github.com/1ch0/go-restful/pkg/apiserver/interface/api"
 	"github.com/1ch0/go-restful/pkg/apiserver/utils"
 	"github.com/1ch0/go-restful/pkg/apiserver/utils/container"
 	"github.com/1ch0/go-restful/pkg/apiserver/utils/log"
@@ -30,7 +30,7 @@ type restServer struct {
 	webContainer  *restful.Container
 	beanContainer *container.Container
 	cfg           config.Config
-	datastore     datastore.DataStore
+	dataStore     datastore.DataStore
 }
 
 func New(cfg config.Config) (a APIServer) {
@@ -43,6 +43,24 @@ func New(cfg config.Config) (a APIServer) {
 }
 
 func (s *restServer) buildIoCContainer() error {
+	// infrastructure
+	var ds datastore.DataStore
+	var err error
+	switch s.cfg.Datastore.Type {
+	case "mongodb":
+		ds, err = mongodb.New(context.Background(), s.cfg.Datastore)
+		if err != nil {
+			return fmt.Errorf("create mongodb datastore instance failure %w", err)
+		}
+	default:
+		return fmt.Errorf("not support datastore type %s", s.cfg.Datastore.Type)
+	}
+
+	s.dataStore = ds
+	if err := s.beanContainer.ProvideWithName("datastore", s.dataStore); err != nil {
+		fmt.Errorf("not support datastore type %s", s.cfg.Datastore.Type)
+	}
+
 	// domain
 	if err := s.beanContainer.Provides(service.InitServiceBean(s.cfg)...); err != nil {
 		return fmt.Errorf("fail to provides the service bean to the container: %w", err)
@@ -53,10 +71,23 @@ func (s *restServer) buildIoCContainer() error {
 		return fmt.Errorf("fail to provides the api bean to the container: %w", err)
 	}
 
+	if err := s.beanContainer.Populate(); err != nil {
+		return fmt.Errorf("fail to populate the bean container: %w", err)
+	}
+
 	return nil
 }
 
 func (s *restServer) Run(ctx context.Context, errChan chan error) error {
+	// build the Ioc Container
+	if err := s.buildIoCContainer(); err != nil {
+		return err
+	}
+
+	// init database
+	if err := service.InitData(ctx); err != nil {
+		return fmt.Errorf("fail to init database %w", err)
+	}
 
 	s.RegisterAPIRoute()
 

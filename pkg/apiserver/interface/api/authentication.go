@@ -10,9 +10,11 @@ import (
 )
 
 type authenticationAPIInterface struct {
-	AuthentcationService service.AuthenticationService
+	AuthenticationService service.AuthenticationService `inject:""`
+	UserService           service.UserService           `inject:""`
 }
 
+// NewAuthenticationAPIInterface is the APIInterface of authentication
 func NewAuthenticationAPIInterface() Interface {
 	return &authenticationAPIInterface{}
 }
@@ -43,7 +45,7 @@ func (c *authenticationAPIInterface) login(req *restful.Request, res *restful.Re
 		bcode.ReturnError(req, res, err)
 		return
 	}
-	base, err := c.AuthentcationService.Login(req.Request.Context(), loginReq)
+	base, err := c.AuthenticationService.Login(req.Request.Context(), loginReq)
 	if err != nil {
 		bcode.ReturnError(req, res, err)
 		return

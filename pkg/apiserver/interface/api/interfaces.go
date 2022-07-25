@@ -1,6 +1,11 @@
 package api
 
-import "github.com/emicklei/go-restful/v3"
+import (
+	"net/http"
+
+	apisv1 "github.com/1ch0/go-restful/pkg/apiserver/interface/api/dto/v1"
+	"github.com/emicklei/go-restful/v3"
+)
 
 var versionPerfix = "/api/v1"
 
@@ -18,15 +23,22 @@ func GetRegisterAPIInterface() []Interface {
 	return registeredAPIInterface
 }
 
+func returns200(b *restful.RouteBuilder) {
+	b.Returns(http.StatusOK, "OK", apisv1.SimpleResponse{Status: "ok"})
+}
+
+func returns500(b *restful.RouteBuilder) {
+	b.Returns(http.StatusInternalServerError, "Bummer, something went wrong", nil)
+}
+
 func InitAPIBean() []interface{} {
 	// Authentication
 	RegisterAPIInterface(NewAuthenticationAPIInterface())
-	//RegisterAPIInterface(NewUserAPIInterface())
+	RegisterAPIInterface(NewUserAPIInterface())
 
 	var beans []interface{}
 	for i := range registeredAPIInterface {
 		beans = append(beans, registeredAPIInterface[i])
 	}
-	beans = append(beans, NewAuthenticationAPIInterface())
 	return beans
 }

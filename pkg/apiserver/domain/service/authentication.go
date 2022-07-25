@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/1ch0/go-restful/pkg/apiserver/infrastructure/datastore"
+
 	apisv1 "github.com/1ch0/go-restful/pkg/apiserver/interface/api/dto/v1"
 	"github.com/1ch0/go-restful/pkg/apiserver/utils/bcode"
 )
@@ -20,6 +22,8 @@ type AuthenticationService interface {
 }
 
 type authenticationServiceImpl struct {
+	UserService UserService         `inject:""`
+	Store       datastore.DataStore `inject:"datastore"`
 }
 
 func NewAuthenticationService() AuthenticationService {
@@ -31,9 +35,10 @@ type authHanler interface {
 }
 
 type localHandlerImpl struct {
-	//userService UserService
-	username string
-	password string
+	ds          datastore.DataStore
+	userService UserService
+	username    string
+	password    string
 }
 
 func (a *authenticationServiceImpl) newLocalHandler(req apisv1.LoginRequest) (*localHandlerImpl, error) {

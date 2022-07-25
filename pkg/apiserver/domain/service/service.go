@@ -10,9 +10,11 @@ import (
 var needInitData []DataInit
 
 func InitServiceBean(c config.Config) []interface{} {
+	//rbacService := NewRBACService()
 	userService := NewUserService()
+	authenticationService := NewAuthenticationService()
 	needInitData = []DataInit{userService}
-	return []interface{}{userService}
+	return []interface{}{userService, authenticationService}
 }
 
 type DataInit interface {

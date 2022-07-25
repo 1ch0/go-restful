@@ -11,6 +11,11 @@ type UserBase struct {
 	Disabled      bool      `json:"disabled"`
 }
 
+// SimpleResponse simple response model for temporary
+type SimpleResponse struct {
+	Status string `json:"status"`
+}
+
 type LoginRequest struct {
 	Code     string `json:"code,omitempty" optional:"true"`
 	Username string `json:"username,omitempty" optional:"true"`
@@ -26,4 +31,7 @@ type LoginResponse struct {
 type RefreshTokenResponse struct {
 	AccessToken  string `json:"accessToken"`
 	RefreshToken string `json:"refreshToken"`
+}
+
+type ListUserResponse struct {
 }
