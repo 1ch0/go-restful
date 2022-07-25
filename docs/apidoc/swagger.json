@@ -1,0 +1,203 @@
+{
+	"swagger": "2.0",
+	"info": {
+		"description": "1ch0 go-restful api doc",
+		"title": "1ch0 go-restful api doc",
+		"contact": {
+			"name": "1ch0 go-restful",
+			"url": "https://1ch0.github.io/",
+			"email": "github1ch0@163.com"
+		},
+		"license": {
+			"name": "Apache License 2.0",
+			"url": "https://github.com/1ch0/go-restful/blob/main/LICENSE"
+		},
+		"version": "v1"
+	},
+	"paths": {
+		"/api/v1/auth/login": {
+			"post": {
+				"consumes": [
+					"application/xml",
+					"application/json"
+				],
+				"produces": [
+					"application/json",
+					"application/xml"
+				],
+				"tags": [
+					"authentication"
+				],
+				"summary": "hanle login request",
+				"operationId": "login",
+				"parameters": [
+					{
+						"name": "body",
+						"in": "body",
+						"required": true,
+						"schema": {
+							"$ref": "#/definitions/v1.LoginRequest"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "",
+						"schema": {
+							"$ref": "#/definitions/v1.LoginResponse"
+						}
+					},
+					"400": {
+						"description": "",
+						"schema": {
+							"$ref": "#/definitions/bcode.Bcode"
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/users": {
+			"get": {
+				"consumes": [
+					"application/xml",
+					"application/json"
+				],
+				"produces": [
+					"application/json",
+					"application/xml"
+				],
+				"tags": [
+					"user"
+				],
+				"summary": "list users",
+				"operationId": "listUser",
+				"parameters": [
+					{
+						"type": "integer",
+						"description": "query the page number",
+						"name": "page",
+						"in": "query"
+					},
+					{
+						"type": "integer",
+						"description": "query the page size number",
+						"name": "pageSize",
+						"in": "query"
+					},
+					{
+						"type": "string",
+						"description": "fuzzy search based on name",
+						"name": "name",
+						"in": "query"
+					},
+					{
+						"type": "string",
+						"description": "fuzzy search based on email",
+						"name": "email",
+						"in": "query"
+					},
+					{
+						"type": "string",
+						"description": "fuzzy search based on alias",
+						"name": "alias",
+						"in": "query"
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "OK",
+						"schema": {
+							"$ref": "#/definitions/v1.ListUserResponse"
+						}
+					},
+					"400": {
+						"description": "Bad Request",
+						"schema": {
+							"$ref": "#/definitions/bcode.Bcode"
+						}
+					}
+				}
+			}
+		}
+	},
+	"definitions": {
+		"bcode.Bcode": {
+			"required": [
+				"BusinessCode",
+				"Message"
+			],
+			"properties": {
+				"BusinessCode": {
+					"type": "integer",
+					"format": "int32"
+				},
+				"Message": {
+					"type": "string"
+				}
+			}
+		},
+		"v1.ListUserResponse": {},
+		"v1.LoginRequest": {
+			"properties": {
+				"code": {
+					"type": "string"
+				},
+				"password": {
+					"type": "string"
+				},
+				"username": {
+					"type": "string"
+				}
+			}
+		},
+		"v1.LoginResponse": {
+			"required": [
+				"user",
+				"accessToken",
+				"refreshToken"
+			],
+			"properties": {
+				"accessToken": {
+					"type": "string"
+				},
+				"refreshToken": {
+					"type": "string"
+				},
+				"user": {
+					"$ref": "#/definitions/v1.UserBase"
+				}
+			}
+		},
+		"v1.UserBase": {
+			"required": [
+				"createTime",
+				"lastLoginTime",
+				"name",
+				"email",
+				"disabled"
+			],
+			"properties": {
+				"alias": {
+					"type": "string"
+				},
+				"createTime": {
+					"type": "string",
+					"format": "date-time"
+				},
+				"disabled": {
+					"type": "boolean"
+				},
+				"email": {
+					"type": "string"
+				},
+				"lastLoginTime": {
+					"type": "string",
+					"format": "date-time"
+				},
+				"name": {
+					"type": "string"
+				}
+			}
+		}
+	}
+}

@@ -2,11 +2,15 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"flag"
 	"fmt"
 	"os"
 	"os/signal"
 	"syscall"
+
+	restfulSpec "github.com/emicklei/go-restful-openapi/v2"
+	"github.com/go-openapi/spec"
 
 	"github.com/1ch0/go-restful/pkg/apiserver"
 	"github.com/1ch0/go-restful/pkg/apiserver/config"
@@ -21,33 +25,33 @@ func main() {
 	flag.StringVar(&s.serverConfig.Datastore.URL, "datastore-url", "mongodb://root:zx123C@124.223.36.219:57017", "Metadata storage database url,takes effect when the storage driver is mongodb.")
 	flag.Parse()
 
-	//if len(os.Args) > 2 && os.Args[1] == "build-swagger" {
-	//	func() {
-	//		swagger, err := s.buildSwagger()
-	//		if err != nil {
-	//			log.Logger.Fatal(err.Error())
-	//		}
-	//		outData, err := json.MarshalIndent(swagger, "", "\t")
-	//		if err != nil {
-	//			log.Logger.Fatal(err.Error())
-	//		}
-	//		swaggerFile, err := os.OpenFile(os.Args[2], os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0600)
-	//		if err != nil {
-	//			log.Logger.Fatal(err.Error())
-	//		}
-	//		defer func() {
-	//			if err := swaggerFile.Close(); err != nil {
-	//				log.Logger.Error("close swagger file failur %s", err.Error())
-	//			}
-	//		}()
-	//		_, err = swaggerFile.Write(outData)
-	//		if err != nil {
-	//			log.Logger.Fatal(err.Error())
-	//		}
-	//		fmt.Println("build swagger config file success")
-	//	}()
-	//	return
-	//}
+	if len(os.Args) > 2 && os.Args[1] == "build-swagger" {
+		func() {
+			swagger, err := s.buildSwagger()
+			if err != nil {
+				log.Logger.Fatal(err.Error())
+			}
+			outData, err := json.MarshalIndent(swagger, "", "\t")
+			if err != nil {
+				log.Logger.Fatal(err.Error())
+			}
+			swaggerFile, err := os.OpenFile(os.Args[2], os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0600)
+			if err != nil {
+				log.Logger.Fatal(err.Error())
+			}
+			defer func() {
+				if err := swaggerFile.Close(); err != nil {
+					log.Logger.Error("close swagger file failur %s", err.Error())
+				}
+			}()
+			_, err = swaggerFile.Write(outData)
+			if err != nil {
+				log.Logger.Fatal(err.Error())
+			}
+			fmt.Println("build swagger config file success")
+		}()
+		return
+	}
 
 	errChan := make(chan error)
 	ctx, cancel := context.WithCancel(context.Background())
@@ -81,11 +85,11 @@ func (s *Server) run(ctx context.Context, errChan chan error) error {
 	return server.Run(ctx, errChan)
 }
 
-//func (s *Server) buildSwagger() (*spec.Swagger, error) {
-//	server := apiserver.New(s.serverConfig)
-//	config, err := server.BuildRestfulConfig()
-//	if err != nil {
-//		return nil, err
-//	}
-//	return restfulSpec.BuildSwagger(*config), nil
-//}
+func (s *Server) buildSwagger() (*spec.Swagger, error) {
+	server := apiserver.New(s.serverConfig)
+	config, err := server.BuildRestfulConfig()
+	if err != nil {
+		return nil, err
+	}
+	return restfulSpec.BuildSwagger(*config), nil
+}
