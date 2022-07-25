@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"regexp"
 	"strings"
 	"time"
 
@@ -35,12 +36,17 @@ func New(ctx context.Context, cfg datastore.Config) (datastore.DataStore, error)
 	if err != nil {
 		return nil, err
 	}
-
+	log.Logger.Infof("connected to mongodb: %s", hidePass(cfg.URL))
 	m := &mongodb{
 		client:   client,
 		database: cfg.Database,
 	}
 	return m, err
+}
+
+func hidePass(str string) string {
+	reg := regexp.MustCompile(`(^mongodb://.+?:)(.+)(@.+$)`)
+	return reg.ReplaceAllString(str, `${1}xxx${3}`)
 }
 
 // Add add data model

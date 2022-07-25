@@ -16,6 +16,9 @@ import (
 func main() {
 	s := &Server{}
 	flag.StringVar(&s.serverConfig.BindAddr, "bind-addr", "0.0.0.0:8080", "The bind address used to serve the http APIs.")
+	flag.StringVar(&s.serverConfig.Datastore.Type, "datastore-type", "mongodb", "Metadata storage driver type, support mongodb.")
+	flag.StringVar(&s.serverConfig.Datastore.Database, "datastore-database", "go-restful", "Metadata storage database name, takes effect when the storage driver is mongodb.")
+	flag.StringVar(&s.serverConfig.Datastore.URL, "datastore-url", "mongodb://root:zx123C@124.223.36.219:57017", "Metadata storage database url,takes effect when the storage driver is mongodb.")
 	flag.Parse()
 
 	//if len(os.Args) > 2 && os.Args[1] == "build-swagger" {
